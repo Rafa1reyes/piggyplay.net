@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PiggyPlay — Tiny bets. Big bragging rights.</title>
+<meta name="description" content="PiggyPlay is where friends settle it for real: quick skill games — Connect 4, Dots & Boxes, Sink It, RPS — with tiny point bets. 1 point = 1¢.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23ff8fbb'/%3E%3Cellipse cx='50' cy='56' rx='22' ry='17' fill='%23ffb3cd'/%3E%3Ccircle cx='42' cy='56' r='4.5' fill='%237a2740'/%3E%3Ccircle cx='58' cy='56' r='4.5' fill='%237a2740'/%3E%3Ccircle cx='33' cy='38' r='7' fill='%23ffb3cd'/%3E%3Ccircle cx='67' cy='38' r='7' fill='%23ffb3cd'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#2a0716; --bg2:#3a1620; --panel:#471c2c; --line:#5e2438;
+    --pink:#ff8fbb; --pink2:#ffb3cd; --gold:#ffd36b; --ink:#fff2f7; --dim:#d9a8bc;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  a{color:inherit}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;background:rgba(42,7,22,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:21px;text-decoration:none}
+  .logo .pig{font-size:26px}
+  .nav-links{display:flex;gap:28px;font-size:14.5px;font-weight:600}
+  .nav-links a{text-decoration:none;color:var(--dim)}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{display:inline-block;background:var(--pink);color:#3a0d1e;font-weight:800;padding:11px 22px;border-radius:12px;text-decoration:none;font-size:15px;transition:transform .12s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.big{padding:15px 32px;font-size:17px;border-radius:14px}
+  .btn.ghost{background:transparent;color:var(--pink);border:2px solid var(--pink)}
+  /* hero */
+  .hero{padding:88px 0 70px;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+  .kicker{display:inline-block;background:#47142a;color:var(--gold);font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:20px;margin-bottom:20px}
+  h1{font-size:56px;line-height:1.06;font-weight:900;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--pink)}
+  .sub{font-size:19px;color:var(--dim);margin:22px 0 30px;max-width:32em}
+  .cents{color:var(--gold);font-weight:800}
+  .cta-row{display:flex;gap:14px;align-items:center}
+  .fineprint{font-size:12.5px;color:#a4718a;margin-top:14px}
+  /* board mockup */
+  .board-card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:0 30px 70px rgba(0,0,0,.45)}
+  .match-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .pl{display:flex;align-items:center;gap:9px;font-weight:800;font-size:14.5px}
+  .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;background:#5e2438}
+  .pot{background:#3b2d00;color:var(--gold);font-weight:900;font-size:13.5px;padding:7px 14px;border-radius:20px}
+  .c4{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;background:#22050f;border-radius:16px;padding:14px}
+  .cell{aspect-ratio:1;border-radius:50%;background:#43142a}
+  .cell.p1{background:var(--pink)}
+  .cell.p2{background:var(--gold)}
+  .match-foot{display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--dim);font-weight:600}
+  .turn{color:var(--pink2)}
+  /* sections */
+  section{padding:74px 0}
+  .sec-k{color:var(--pink);font-weight:800;font-size:13.5px;letter-spacing:.1em;text-transform:uppercase}
+  h2{font-size:38px;font-weight:900;letter-spacing:-.01em;margin:10px 0 14px}
+  .lead{color:var(--dim);font-size:17px;max-width:44em}
+  .games{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:40px}
+  .game{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:26px 22px;transition:transform .15s,border-color .15s}
+  .game:hover{transform:translateY(-4px);border-color:var(--pink)}
+  .game .ic{font-size:36px}
+  .game h3{font-size:19px;margin:12px 0 6px}
+  .game p{font-size:14px;color:var(--dim);line-height:1.5}
+  .tag{display:inline-block;margin-top:12px;background:#47142a;color:var(--pink2);font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:12px}
+  /* how */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:40px;counter-reset:step}
+  .step{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:26px 22px;position:relative}
+  .step::before{counter-increment:step;content:counter(step);position:absolute;top:-16px;left:22px;width:32px;height:32px;border-radius:50%;background:var(--pink);color:#3a0d1e;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .step h3{font-size:17px;margin:8px 0 6px}
+  .step p{font-size:14px;color:var(--dim)}
+  /* trust */
+  .trust{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  .tcard{background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:26px 22px}
+  .tcard .ic{font-size:28px}
+  .tcard h3{font-size:17px;margin:10px 0 6px}
+  .tcard p{font-size:14px;color:var(--dim)}
+  /* cta band */
+  .band{background:linear-gradient(135deg,#4d1129,#38091c);border:1px solid var(--line);border-radius:28px;padding:60px 48px;text-align:center;margin:20px 0 40px}
+  .band h2{margin-bottom:10px}
+  .band p{color:var(--dim);margin-bottom:28px}
+  footer{border-top:1px solid var(--line);padding:38px 0 46px;font-size:13.5px;color:#a4718a}
+  .f-in{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .f-in a{color:var(--pink2);text-decoration:none;font-weight:600}
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr;padding-top:56px}
+    h1{font-size:40px}
+    .games,.steps,.trust{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+  }
+  @media(max-width:560px){.games,.steps,.trust{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav-in">
+  <a class="logo" href="#"><span class="pig">🐷</span>PiggyPlay</a>
+  <div class="nav-links">
+    <a href="#games">Games</a><a href="#how">How it works</a><a href="#fair">Fair play</a>
+  </div>
+  <a class="btn" href="mailto:beta@piggyplay.net?subject=PiggyPlay%20early%20access">Get early access</a>
+</div></nav>
+
+<header class="wrap hero">
+  <div>
+    <span class="kicker">🎉 Now in private beta</span>
+    <h1>Tiny bets.<br><em>Big</em> bragging rights.</h1>
+    <p class="sub">Challenge your friends to quick games of skill — Connect&nbsp;4, Dots&nbsp;&amp;&nbsp;Boxes, Sink&nbsp;It, and Rock-Paper-Scissors — with a few points riding on every match. <span class="cents">1&nbsp;point&nbsp;=&nbsp;1¢</span>, so a heated best-of-five costs less than a gumball.</p>
+    <div class="cta-row">
+      <a class="btn big" href="mailto:beta@piggyplay.net?subject=PiggyPlay%20early%20access&body=I%20want%20in!%20Here%27s%20my%20name%3A">🐷 Request an invite</a>
+      <a class="btn big ghost" href="#how">See how it works</a>
+    </div>
+    <p class="fineprint">18+ · Games of skill played head-to-head · Beta uses play-points while real-money features finish compliance review.</p>
+  </div>
+  <div class="board-card">
+    <div class="match-top">
+      <span class="pl"><span class="av">🐷</span>You</span>
+      <span class="pot">🪙 40 pts on the line</span>
+      <span class="pl">Maya <span class="av">🦊</span></span>
+    </div>
+    <div class="c4">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell p1"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell p2"></div><div class="cell p1"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell p2"></div><div class="cell p1"></div><div class="cell p2"></div><div class="cell p1"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell p1"></div><div class="cell p2"></div><div class="cell p1"></div><div class="cell p1"></div><div class="cell p2"></div><div class="cell p2"></div><div class="cell"></div>
+    </div>
+    <div class="match-foot"><span class="turn">● Your move — drop to win</span><span>🔥 3-game win streak</span></div>
+  </div>
+</header>
+
+<section id="games"><div class="wrap">
+  <span class="sec-k">The lineup</span>
+  <h2>Four games. Zero draws. One winner.</h2>
+  <p class="lead">Every game on PiggyPlay is quick, head-to-head, and always ends with a winner — because nobody antes up for a tie.</p>
+  <div class="games">
+    <div class="game"><span class="ic">🔴</span><h3>Connect 4</h3><p>The classic drop-and-block duel. Read your rival, spring the double threat.</p><span class="tag">~3 min</span></div>
+    <div class="game"><span class="ic">✏️</span><h3>Dots &amp; Boxes</h3><p>Claim squares, force the long chains, and watch your rival hand you the board.</p><span class="tag">~4 min</span></div>
+    <div class="game"><span class="ic">🚢</span><h3>Sink It</h3><p>Hide your fleet, hunt theirs. Every shot fires up the tension.</p><span class="tag">~5 min</span></div>
+    <div class="game"><span class="ic">✊</span><h3>Rock · Paper · Scissors</h3><p>Best-of series with mind games galore. The purest 10-second showdown.</p><span class="tag">~1 min</span></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <span class="sec-k">How it works</span>
+  <h2>From “bet you can’t” to bragging rights in four steps</h2>
+  <div class="steps">
+    <div class="step"><h3>Load your piggy</h3><p>Top up points to play with. 100 points = $1 — nobody’s rent money is at stake.</p></div>
+    <div class="step"><h3>Set the stakes</h3><p>Challenge a friend, pick the game, agree the ante. Both sides lock in before play.</p></div>
+    <div class="step"><h3>Play it out</h3><p>Winner takes the pot the second the game ends. Streaks build your rep.</p></div>
+    <div class="step"><h3>Cash out anytime</h3><p>Your points are yours. Tap cash-out and empty the piggy whenever you like.</p></div>
+  </div>
+</div></section>
+
+<section id="fair"><div class="wrap">
+  <span class="sec-k">Fair &amp; friendly</span>
+  <h2>Built so the best player wins</h2>
+  <div class="trust">
+    <div class="tcard"><span class="ic">🧠</span><h3>Skill, not slots</h3><p>No RNG jackpots, no house edge. You play a real opponent and the better player takes the pot.</p></div>
+    <div class="tcard"><span class="ic">🪙</span><h3>Pocket-change stakes</h3><p>Points are worth a cent each with sensible caps. It’s about the win, not the wallet.</p></div>
+    <div class="tcard"><span class="ic">🛡️</span><h3>Safeguards first</h3><p>18+ only, spending limits, and real-money play ships only after full legal &amp; compliance review.</p></div>
+  </div>
+</div></section>
+
+<div class="wrap"><div class="band">
+  <h2>Want in on the beta?</h2>
+  <p>We’re letting players in a few at a time. Tell us who you are and we’ll save you a seat at the table.</p>
+  <a class="btn big" href="mailto:beta@piggyplay.net?subject=PiggyPlay%20early%20access&body=I%20want%20in!%20Here%27s%20my%20name%3A">🐷 Request early access</a>
+</div></div>
+
+<footer><div class="wrap f-in">
+  <span>© 2026 Spindola Software · PiggyPlay™</span>
+  <span>Questions? <a href="mailto:hello@piggyplay.net">hello@piggyplay.net</a></span>
+</div></footer>
+
+</body>
+</html>
